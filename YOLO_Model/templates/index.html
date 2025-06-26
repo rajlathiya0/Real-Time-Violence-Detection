@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camera Monitor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <div class="camera-container">
+            <div class="camera-header">
+                <h1>Camera 1 Monitor</h1>
+                <div class="status-indicator">
+                    <span class="status-dot"></span>
+                    <span class="status-text">Live</span>
+                </div>
+            </div>
+            <img id="video" src="{{ url_for('video_feed') }}" alt="Video Feed">
+            <canvas id="snapshot-canvas" style="display: none;"></canvas>
+        </div>
+        
+        <div class="sidebar">
+            <div class="button-container">
+                <button id="violence-button" class="pulse-button">
+                    <span class="button-text">Report Violence</span>
+                </button>
+                <div id="location-notice" class="location-permission-notice">
+                    Please enable location services for accurate event tracking.
+                </div>
+            </div>
+            
+            <div class="history-container">
+                <div class="history-header">
+                    <h2>Event History</h2>
+                    <button id="clear-history" class="icon-button">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+                    </button>
+                </div>
+                <div id="history-list" class="history-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="notification" class="notification">
+        <span id="notification-text"></span>
+    </div>
+    
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+    <!-- Hidden input to trigger event from backend -->
+    <input type="hidden" id="violence-trigger" value="0">
+
+    <!-- Polling script for backend violence detection -->
+    <script>
+        setInterval(async () => {
+            try {
+                const res = await fetch('/check_trigger');
+                const data = await res.json();
+                if (data.trigger === true) {
+                    document.getElementById('violence-trigger').value = '1';
+                }
+            } catch (err) {
+                console.error('Error polling trigger:', err);
+            }
+        }, 1000);
+    </script>
+</body>
+</html>
